@@ -5,9 +5,12 @@ namespace App;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class ScoritoClassicsGame {
+class ScoritoClassicsGame
+{
     private HttpClientInterface $client;
+
     private int $raceId;
+
     private ProCyclingStatsFetcher $fetcher;
 
     public function __construct(int $raceId, array $filterRaces)
@@ -27,7 +30,7 @@ class ScoritoClassicsGame {
 
     public function fetch(): array
     {
-        $response = $this->client->request('GET', 'https://cycling.scorito.com/cyclingteammanager/v2.0/marketrider/' . $this->raceId);
+        $response = $this->client->request('GET', 'https://cycling.scorito.com/cyclingteammanager/v2.0/marketrider/'.$this->raceId);
         $scoritoData = $response->toArray();
 
         $teams = $this->fetchTeams();

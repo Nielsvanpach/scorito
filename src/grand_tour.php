@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App;
 
@@ -9,9 +9,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 define('RACE_ID', 171);
 
-require_once('vendor/autoload.php');
-require_once('ProCyclingStatsFetcher.php');
-require_once('ScoritoFormatter.php');
+require_once 'vendor/autoload.php';
+require_once 'ProCyclingStatsFetcher.php';
+require_once 'ScoritoFormatter.php';
 
 $scorito = new ScoritoGrandTourGame(
     RACE_ID
@@ -27,14 +27,18 @@ foreach ($scoritoData as $row) {
         if (is_array($col)) {
             return print_r($col, true);
         }
+
         return $col;
     }, $row));
 }
 fclose($out);
 
-class ScoritoGrandTourGame {
+class ScoritoGrandTourGame
+{
     private HttpClientInterface $client;
+
     private int $raceId;
+
     private ProCyclingStatsFetcher $fetcher;
 
     public function __construct(int $raceId)
@@ -54,7 +58,7 @@ class ScoritoGrandTourGame {
 
     public function fetch(): array
     {
-        $response = $this->client->request('GET', 'https://cycling.scorito.com/cyclingmanager/v1.0/eventriderenriched/' . $this->raceId);
+        $response = $this->client->request('GET', 'https://cycling.scorito.com/cyclingmanager/v1.0/eventriderenriched/'.$this->raceId);
         $scoritoData = $response->toArray();
 
         $teams = $this->fetchTeams();
@@ -71,6 +75,6 @@ class ScoritoGrandTourGame {
 
     private function filterRidersOnStatus(array $riders): array
     {
-        return array_values(array_filter($riders, fn($rider): bool => $rider['Status'] === 1));
+        return array_values(array_filter($riders, fn ($rider): bool => $rider['Status'] === 1));
     }
 }

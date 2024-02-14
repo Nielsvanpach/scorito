@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App;
 
 define('RACE_ID', 227);
 
-require_once('vendor/autoload.php');
-require_once('src/ProCyclingStatsFetcher.php');
-require_once('src/ScoritoFormatter.php');
+require_once 'vendor/autoload.php';
+require_once 'src/ProCyclingStatsFetcher.php';
+require_once 'src/ScoritoFormatter.php';
 
 $scorito = new ScoritoClassicsGame(
     RACE_ID,
@@ -43,6 +43,7 @@ foreach ($scoritoData as $row) {
         if (is_array($col)) {
             return print_r($col, true);
         }
+
         return $col;
     }, $row));
 }
