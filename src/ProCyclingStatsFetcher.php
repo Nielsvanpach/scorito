@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\Cache\Adapter\AdapterInterface;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\Cache\CacheItem;
+namespace App;
+
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\CacheItem;
 
 class ProCyclingStatsFetcher
 {
@@ -313,6 +315,4 @@ class ProCyclingStatsFetcher
     }
 }
 
-class CyclistNotFound extends \RuntimeException
-{
-}
+class CyclistNotFound extends \RuntimeException {}
