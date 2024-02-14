@@ -36,5 +36,6 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "scripts": {
+        "test": "./vendor/bin/phpunit"
     }
 }
