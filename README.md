@@ -4,7 +4,7 @@ This repo fetches all riders for a Scorito game. For the classics game it fetche
 composer install
 
 ## Run
-`php classics.php`
+`php src/classics.php`
 Will output a csv to classics.csv
-`php grand_tour.php`
+`php src/grand_tour.php`
 Will output a csv to grand-tour.csv
