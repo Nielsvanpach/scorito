@@ -17,6 +17,7 @@ class ScoritoFormatter
             5 => 'Scorito Hill',
             6 => 'Scorito Cobbles',
         ];
+
         $qualities = $rider['Qualities'];
         unset($rider['Qualities']);
 
