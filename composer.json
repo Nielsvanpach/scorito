@@ -6,7 +6,9 @@
             "email": "j.vandelaar@pararius.nl"
         }
     ],
+    "license": "MIT",
     "require": {
+        "php": "^8.2",
         "symfony/var-dumper": "^5.2",
         "symfony/dom-crawler": "^5.2",
         "symfony/css-selector": "^5.2",
@@ -18,5 +20,14 @@
     "require-dev": {
         "laravel/pint": "^1.13",
         "rector/rector": "^1.0"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "scripts": {
     }
 }
