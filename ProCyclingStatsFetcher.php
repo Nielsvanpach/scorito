@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-namespace App;
-
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\CacheItem;

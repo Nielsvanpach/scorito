@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-namespace App;
-
 class ScoritoFormatter
 {
     public static function formatQualities(array $rider): array
@@ -17,7 +15,6 @@ class ScoritoFormatter
             5 => 'Scorito Hill',
             6 => 'Scorito Cobbles',
         ];
-
         $qualities = $rider['Qualities'];
         unset($rider['Qualities']);
 

@@ -2,24 +2,41 @@
 
 declare(strict_types=1);
 
-namespace App;
-
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-define('RACE_ID', 171);
+define('RACE_ID', 227);
 
 require_once 'vendor/autoload.php';
 require_once 'ProCyclingStatsFetcher.php';
 require_once 'ScoritoFormatter.php';
 
-$scorito = new ScoritoGrandTourGame(
-    RACE_ID
+$scorito = new ScoritoClassicsGame(
+    RACE_ID,
+    [
+        'Omloop Het Nieuwsblad Elite',
+        'Kuurne - Bruxelles - Kuurne',
+        'Strade Bianche',
+        // 'Milano - Torino',
+        'Milano-Sanremo',
+        'Classic Brugge-De Panne',
+        'E3 Saxo Classic',
+        'Gent-Wevelgem in Flanders Fields',
+        'Dwars door Vlaanderen - A travers la Flandre',
+        'Ronde van Vlaanderen - Tour des Flandres',
+        'Scheldeprijs',
+        'Amstel Gold Race',
+        'Paris-Roubaix',
+        'De Brabantse Pijl - La Flèche Brabançonne',
+        'La Flèche Wallonne',
+        'Liège-Bastogne-Liège',
+        'Eschborn-Frankfurt',
+    ]
 );
 
 $scoritoData = $scorito->fetch();
 
-$out = fopen('grand-tour.csv', 'w');
+$out = fopen('classics.csv', 'w');
 fputcsv($out, array_keys($scoritoData[0]));
 
 foreach ($scoritoData as $row) {
@@ -33,7 +50,7 @@ foreach ($scoritoData as $row) {
 }
 fclose($out);
 
-class ScoritoGrandTourGame
+class ScoritoClassicsGame
 {
     private HttpClientInterface $client;
 
@@ -41,11 +58,11 @@ class ScoritoGrandTourGame
 
     private ProCyclingStatsFetcher $fetcher;
 
-    public function __construct(int $raceId)
+    public function __construct(int $raceId, array $filterRaces)
     {
         $this->raceId = $raceId;
         $this->client = HttpClient::create();
-        $this->fetcher = new ProCyclingStatsFetcher($this->client);
+        $this->fetcher = new ProCyclingStatsFetcher($this->client, $filterRaces);
     }
 
     public function fetchTeams(): array
@@ -58,23 +75,18 @@ class ScoritoGrandTourGame
 
     public function fetch(): array
     {
-        $response = $this->client->request('GET', 'https://cycling.scorito.com/cyclingmanager/v1.0/eventriderenriched/'.$this->raceId);
+        $response = $this->client->request('GET', 'https://cycling.scorito.com/cyclingteammanager/v2.0/marketrider/'.$this->raceId);
         $scoritoData = $response->toArray();
 
         $teams = $this->fetchTeams();
 
-        $filtered = $this->filterRidersOnStatus($scoritoData['Content']);
+        $filtered = $scoritoData['Content'];
 
         $filtered = array_map(['ScoritoFormatter', 'formatQualities'], $filtered);
         $filtered = array_map(['ScoritoFormatter', 'formatType'], $filtered);
         $filtered = array_map(fn (array $rider) => ScoritoFormatter::formatTeam($rider, $teams), $filtered);
         $filtered = array_map(['ScoritoFormatter', 'filterColumns'], $filtered);
 
-        return $this->fetcher->fetchRiders($filtered, false, true, true);
-    }
-
-    private function filterRidersOnStatus(array $riders): array
-    {
-        return array_values(array_filter($riders, fn ($rider): bool => $rider['Status'] === 1));
+        return $this->fetcher->fetchRiders($filtered, true, true, true);
     }
 }
