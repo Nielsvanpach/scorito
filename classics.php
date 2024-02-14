@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 define('RACE_ID', 227);
 
-require_once('vendor/autoload.php');
-require_once('ProCyclingStatsFetcher.php');
-require_once('ScoritoFormatter.php');
+require_once 'vendor/autoload.php';
+require_once 'ProCyclingStatsFetcher.php';
+require_once 'ScoritoFormatter.php';
 
 $scorito = new ScoritoClassicsGame(
     RACE_ID,
@@ -44,14 +44,18 @@ foreach ($scoritoData as $row) {
         if (is_array($col)) {
             return print_r($col, true);
         }
+
         return $col;
     }, $row));
 }
 fclose($out);
 
-class ScoritoClassicsGame {
+class ScoritoClassicsGame
+{
     private HttpClientInterface $client;
+
     private int $raceId;
+
     private ProCyclingStatsFetcher $fetcher;
 
     public function __construct(int $raceId, array $filterRaces)
@@ -71,7 +75,7 @@ class ScoritoClassicsGame {
 
     public function fetch(): array
     {
-        $response = $this->client->request('GET', 'https://cycling.scorito.com/cyclingteammanager/v2.0/marketrider/' . $this->raceId);
+        $response = $this->client->request('GET', 'https://cycling.scorito.com/cyclingteammanager/v2.0/marketrider/'.$this->raceId);
         $scoritoData = $response->toArray();
 
         $teams = $this->fetchTeams();
