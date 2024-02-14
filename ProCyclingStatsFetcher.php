@@ -1,18 +1,21 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
+use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
-use Symfony\Component\Cache\CacheItem;
-use Symfony\Component\String\Slugger\AsciiSlugger;
 
-class ProCyclingStatsFetcher {
+class ProCyclingStatsFetcher
+{
     private HttpClientInterface $client;
+
     private AdapterInterface $cache;
+
     private array $filterRaces;
 
     public function __construct(HttpClientInterface $client, array $filterRaces = [])
@@ -26,7 +29,7 @@ class ProCyclingStatsFetcher {
     {
         $slugger = new AsciiSlugger();
 
-        $slug =  (string) $slugger->slug($rider['FirstName'] . ' ' . $rider['LastName'])->lower();
+        $slug = (string) $slugger->slug($rider['FirstName'].' '.$rider['LastName'])->lower();
 
         switch ($slug) {
             case 'negasi-haylu-abreha':
@@ -71,15 +74,16 @@ class ProCyclingStatsFetcher {
             case 'diego-camargo':
                 $slug = 'diego-andres-camargo';
                 break;
-            default;
+            default:
                 break;
         }
+
         return $slug;
     }
 
     protected function addUpcomingRacesToRider(bool $addUpcomingRaces, array $rider, array $races): array
     {
-        if (!$addUpcomingRaces) {
+        if (! $addUpcomingRaces) {
             return $rider;
         }
 
@@ -87,12 +91,13 @@ class ProCyclingStatsFetcher {
         foreach ($this->filterRaces as $race) {
             $rider[$race] = in_array($race, $races);
         }
+
         return $rider;
     }
 
     protected function addSpecialtiesToRider(bool $addRiderSpecialties, array $rider, array $riderSpecialties): array
     {
-        if (!$addRiderSpecialties) {
+        if (! $addRiderSpecialties) {
             return $rider;
         }
 
@@ -104,7 +109,7 @@ class ProCyclingStatsFetcher {
 
     protected function addResultsToRider(bool $addResults, array $rider, array $results): array
     {
-        if (!$addResults) {
+        if (! $addResults) {
             return $rider;
         }
 
@@ -123,9 +128,8 @@ class ProCyclingStatsFetcher {
                     $riders[$index] = $this->addUpcomingRacesToRider($addUpcomingRaces, $rider, $cacheItem->get()['upcoming_races']);
                     $riders[$index] = $this->addSpecialtiesToRider($addRiderSpecialties, $riders[$index], $cacheItem->get()['specialties']);
 
-                    echo "CACHE HIT: " . self::formatRiderName($riders[$index]) . PHP_EOL;
-                }
-                else {
+                    echo 'CACHE HIT: '.self::formatRiderName($riders[$index]).PHP_EOL;
+                } else {
                     $responses[] = $this->fetchProCyclingStats($rider, $index, $cacheItem);
                 }
             }
@@ -150,12 +154,13 @@ class ProCyclingStatsFetcher {
                         } catch (Exception $e) {
                             dump($e);
                             dump($response->getInfo('url'));
+
                             continue;
                         }
                     }
 
                     $cacheItem->set(['upcoming_races' => $upcomingRaces, 'specialties' => $specialties, 'results' => $results]);
-                    $cacheItem->expiresAfter(24*60*60); // 1 day
+                    $cacheItem->expiresAfter(24 * 60 * 60); // 1 day
 
                     $riders[$index] = $this->addUpcomingRacesToRider($addUpcomingRaces, $riders[$index], $upcomingRaces);
                     $riders[$index] = $this->addSpecialtiesToRider($addRiderSpecialties, $riders[$index], $specialties);
@@ -163,11 +168,11 @@ class ProCyclingStatsFetcher {
 
                     $this->cache->save($cacheItem);
 
-                    echo "FETCHED: " . self::formatRiderName($riders[$index]) . PHP_EOL;
+                    echo 'FETCHED: '.self::formatRiderName($riders[$index]).PHP_EOL;
                 }
 
-                if (200 !== $response->getStatusCode()) {
-                    throw new \Exception($response->getStatusCode() . ' || ' . $response->getInfo('url'));
+                if ($response->getStatusCode() !== 200) {
+                    throw new \Exception($response->getStatusCode().' || '.$response->getInfo('url'));
                 }
             }
 
@@ -179,14 +184,14 @@ class ProCyclingStatsFetcher {
 
     protected function fetchProCyclingStats(array $rider, int $index, CacheItem $cacheItem): ResponseInterface
     {
-        $url = 'https://www.procyclingstats.com/rider/' . self::formatRiderName($rider);
+        $url = 'https://www.procyclingstats.com/rider/'.self::formatRiderName($rider);
 
         return $this->client->request('GET', $url, ['user_data' => ['index' => $index, 'cache_item' => $cacheItem]]);
     }
 
     protected function crawlUpcomingRaces(bool $addUpcomingRaces, ResponseInterface $response): array
     {
-        if (!$addUpcomingRaces) {
+        if (! $addUpcomingRaces) {
             return [];
         }
 
@@ -203,7 +208,7 @@ class ProCyclingStatsFetcher {
             }
         );
 
-        $upcomingRaces = array_filter($upcomingRaces, function($race) {
+        $upcomingRaces = array_filter($upcomingRaces, function ($race) {
             return in_array($race, $this->filterRaces);
         });
 
@@ -212,7 +217,7 @@ class ProCyclingStatsFetcher {
 
     protected function crawlSpecialty(bool $addRiderSpecialties, ResponseInterface $response): array
     {
-        if (!$addRiderSpecialties) {
+        if (! $addRiderSpecialties) {
             return [];
         }
 
@@ -240,7 +245,7 @@ class ProCyclingStatsFetcher {
 
     protected function crawlResults(bool $addResults, ResponseInterface $response): array
     {
-        if (!$addResults) {
+        if (! $addResults) {
             return [];
         }
 
@@ -271,8 +276,7 @@ class ProCyclingStatsFetcher {
                         if ($result <= 5) {
                             $itt5++;
                         }
-                    }
-                    else {
+                    } else {
                         if ($result <= 20) {
                             $normal++;
                         }
@@ -294,19 +298,21 @@ class ProCyclingStatsFetcher {
 
     protected function fallbackProCyclingStats(array $rider): ResponseInterface
     {
-        $response = $this->client->request('GET', 'https://www.procyclingstats.com/resources/search.php?searchfrom=&term=' . urlencode($rider['FirstName'] . ' ' . $rider['LastName']));
+        $response = $this->client->request('GET', 'https://www.procyclingstats.com/resources/search.php?searchfrom=&term='.urlencode($rider['FirstName'].' '.$rider['LastName']));
         if ($response->getContent() === 'null') {
-            $response = $this->client->request('GET', 'https://www.procyclingstats.com/resources/search.php?searchfrom=&term=' . urlencode($rider['LastName']));
+            $response = $this->client->request('GET', 'https://www.procyclingstats.com/resources/search.php?searchfrom=&term='.urlencode($rider['LastName']));
             if ($response->getContent() === 'null') {
-                throw new CyclistNotFound($rider['FirstName'] . ' ' . $rider['LastName']);
+                throw new CyclistNotFound($rider['FirstName'].' '.$rider['LastName']);
             }
             dump($response->toArray());
         }
 
         $autoComplete = $response->toArray();
 
-        return  $this->client->request('GET', 'https://www.procyclingstats.com/rider/' . $autoComplete[0]['id']);
+        return $this->client->request('GET', 'https://www.procyclingstats.com/rider/'.$autoComplete[0]['id']);
     }
 }
 
-class CyclistNotFound extends \RuntimeException {}
+class CyclistNotFound extends \RuntimeException
+{
+}
